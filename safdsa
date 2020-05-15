@@ -1,2 +1,117 @@
-hello world
-in this 
+#include<iostream>
+using namespace std;
+#define DataType int
+typedef struct AvlNode{
+	DataType data;
+	AvlNode *right;
+	AvlNode *left;
+	int height;
+}*AvlTree,AvlNode;
+
+int Max(int a,int b)
+{
+	return a>b?a:b; 
+}
+
+int Height(AvlTree T)
+{
+	if(T==NULL) return -1;
+	else return T->height;
+}
+
+AvlTree singleRotateWithRight(AvlTree T){
+	AvlTree L=T->left;
+	T->left=L->right;
+	L->right=T;
+	T->height=Max(Height(T->left),Height(T->right))+1;
+	L->height=Max(Height(L->left),Height(L->right))+1;
+	return L;
+}
+
+AvlTree singleRotateWithLeft(AvlTree T){
+	AvlTree R=T->right;
+	T->right=R->left;
+	R->left=T;
+	T->height=Max(Height(T->left),Height(T->right))+1;
+	R->height=Max(Height(R->left),Height(R->right))+1;
+	return R;
+}
+
+AvlTree doubleRotateWithRight(AvlTree T){
+	T->right=singleRotateWithRight(T->right);
+	return singleRotateWithLeft(T);
+}
+
+AvlTree doubleRotateWithLeft(AvlTree T){
+	T->left=singleRotateWithLeft(T->left);
+	return singleRotateWithRight(T);
+}
+
+
+
+AvlTree AvlTreeInsert(AvlTree T,DataType x){
+	if(T==NULL){
+		T=new AvlNode;
+		if(T){
+			T->data=x;
+			T->left=NULL;
+			T->right=NULL;
+			//T->height=0;
+		}
+		else {
+			cout<<"空间不足"<<endl;
+			exit(0);
+		}
+	}
+	else if(x<T->data){
+		T->left=AvlTreeInsert(T->left,x);
+		if(Height(T->left)-Height(T->right)==2){
+			if(x<T->left->data){
+				T=singleRotateWithRight(T);
+			}
+			else {
+				T=doubleRotateWithLeft(T);
+			}
+		}
+	}
+	else if(x>T->data){
+		T->right=AvlTreeInsert(T->right,x);
+		if(Height(T->right)-Height(T->left)==2){
+			if(x>T->right->data){
+				T=singleRotateWithLeft(T);
+			}
+			else{
+				T=doubleRotateWithRight(T);
+			}
+		}
+	}
+	T->height=Max(Height(T->left),Height(T->right))+1;
+	return T;	
+}
+
+void inOrderVisitUseRecur(const AvlTree pCurrent)
+{
+	if(pCurrent){
+		inOrderVisitUseRecur(pCurrent->left);
+			cout<<pCurrent->data<<" ";
+		if(pCurrent->left)
+			cout<<"leftChild:"<<pCurrent->left->data;
+		else 
+			cout<<"leftchild:"<<"NULL";
+		if(pCurrent->right)
+			cout<<"rightchild:"<<pCurrent->right->data;
+		else 
+			cout<<"rightchild:"<<"NULL";
+		cout<<endl;
+		inOrderVisitUseRecur(pCurrent->right); 
+	}
+}
+
+int main(){
+	
+	AvlTree root=NULL; 
+	for(int i=0;i!=15;i++)
+	root=AvlTreeInsert(root,i+1);
+	inOrderVisitUseRecur(root);
+	return 0;
+}
